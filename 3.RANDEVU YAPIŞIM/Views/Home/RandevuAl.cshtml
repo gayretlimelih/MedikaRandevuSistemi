@@ -1,0 +1,117 @@
+﻿@model _3.RANDEVU_YAPISIM.Models.Randevu
+@{
+    ViewData["Title"] = "Randevu Al";
+
+    var saatler = new List<string>
+    {
+        "08:30","09:00","09:30","10:00","10:30","11:00","11:30",
+        "12:00","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00"
+    };
+
+    var doluSaatler = ViewBag.DoluSaatler as List<string> ?? new List<string>();
+}
+
+<div class="container mt-5">
+    <div class="card shadow-lg p-4 mx-auto" style="max-width:600px;">
+        <h3 class="text-center text-primary mb-4 fw-bold">Randevu Al</h3>
+
+        <form asp-action="RandevuAl" method="post">
+            @Html.AntiForgeryToken()
+
+            <!-- Branş -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Branş</label>
+                <select id="BransSelect" class="form-select" required>
+                    <option value="">Branş seçin</option>
+                    <option value="Kardiyoloji">Kardiyoloji</option>
+                    <option value="Dahiliye">Dahiliye</option>
+                    <option value="Ortopedi">Ortopedi</option>
+                    <option value="Göz Hastalıkları">Göz Hastalıkları</option>
+                    <option value="Deri ve Zührevi Hastalıklar">Deri ve Zührevi Hastalıklar</option>
+                </select>
+            </div>
+
+            <!-- Doktor -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Doktor</label>
+                <select asp-for="DoktorId" id="DoktorSelect" class="form-select" required>
+                    <option value="">Önce branş seçin</option>
+                </select>
+            </div>
+
+            <!-- Tarih -->
+            <div class="mb-3">
+                <label asp-for="Tarih" class="form-label fw-semibold">Tarih</label>
+                <input asp-for="Tarih" class="form-control" type="date" required />
+            </div>
+
+            <!-- Saat -->
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Saat</label>
+                <select class="form-select" id="Saat" name="Saat" required>
+                    <option value="">Randevu saati seçin</option>
+                    @foreach (var saat in saatler)
+                    {
+                        var dolu = doluSaatler.Contains(saat);
+                        if (dolu)
+                        {
+                            <option value="@saat" disabled style="background-color:#f1c40f;color:black;" title="Bu saat dolu">
+                                @saat (DOLU)
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="@saat">@saat</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <!-- Açıklama -->
+            <div class="mb-3">
+                <label asp-for="Aciklama" class="form-label fw-semibold">Açıklama (isteğe bağlı)</label>
+                <textarea asp-for="Aciklama" class="form-control" rows="3" placeholder="İsteğe bağlı not yazabilirsiniz"></textarea>
+            </div>
+
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-lg">Randevu Oluştur</button>
+            </div>
+
+            @if (ViewBag.Mesaj != null)
+            {
+                <div class="alert alert-info text-center mt-3 fw-bold">@ViewBag.Mesaj</div>
+            }
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $("#BransSelect").on("change", function () {
+            var brans = $(this).val();
+            var doktorSelect = $("#DoktorSelect");
+
+            doktorSelect.empty().append('<option value="">Yükleniyor...</option>');
+
+            if (brans) {
+                $.getJSON("/Home/GetDoktorlarByBrans", { brans: brans }, function (response) {
+                    doktorSelect.empty();
+
+                    if (response && response.success && response.data && response.data.length > 0) {
+                        doktorSelect.append('<option value="">Doktor seçin</option>');
+                        $.each(response.data, function (i, doktor) {
+                            doktorSelect.append('<option value="' + doktor.id + '">' + doktor.adSoyad + '</option>');
+                        });
+                    } else {
+                        doktorSelect.append('<option value="">Bu branşa ait doktor yok</option>');
+                    }
+                }).fail(function () {
+                    doktorSelect.empty().append('<option value="">Liste alınamadı</option>');
+                });
+            } else {
+                doktorSelect.empty().append('<option value="">Önce branş seçin</option>');
+            }
+        });
+    </script>
+}

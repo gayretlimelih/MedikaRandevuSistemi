@@ -1,0 +1,37 @@
+﻿@{
+    ViewData["Title"] = "Kayıt Ol";
+}
+
+<div class="register-container" style="background:rgba(255,255,255,0.9);padding:40px;border-radius:15px;max-width:450px;margin:80px auto;box-shadow:0 0 15px rgba(0,0,0,0.2);">
+    <h3 style="color:#0057b8;font-weight:700;text-align:center;margin-bottom:25px;">Kayıt Ol</h3>
+
+    @if (ViewBag.Message != null)
+    {
+        <div class="alert alert-info text-center fw-semibold">@ViewBag.Message</div>
+    }
+
+    <form asp-controller="Account" asp-action="Register" method="post">
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Ad Soyad</label>
+            <input type="text" class="form-control" name="AdSoyad" placeholder="Adınızı Soyadınızı girin" required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">E-Posta</label>
+            <input type="email" class="form-control" name="Email" placeholder="ornek@medika.com" required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Şifre</label>
+            <input type="password" class="form-control" name="Sifre" placeholder="Şifre oluştur" required minlength="6" />
+        </div>
+
+        <div class="d-grid">
+            <button type="submit" class="btn btn-primary btn-lg" style="background-color:#0057b8;border:none;">Kayıt Ol</button>
+        </div>
+    </form>
+
+    <div class="text-center mt-3">
+        <a href="/Account/Login" style="color:#0057b8;font-weight:600;text-decoration:none;">Zaten hesabınız var mı? Giriş yapın</a>
+    </div>
+</div>

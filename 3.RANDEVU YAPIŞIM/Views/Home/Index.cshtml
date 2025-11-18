@@ -1,0 +1,30 @@
+﻿@{
+    ViewData["Title"] = "Ana Sayfa";
+    var kullanici = Context.Session.GetString("KullaniciAdi");
+}
+
+<div class="text-center hero-box">
+
+    <h1 class="display-4 fw-bold text-primary">MEDİKA'ya Hoş Geldiniz</h1>
+    <p class="lead mt-3 text-secondary">
+        Türkiye’nin en hızlı ve güvenilir çevrimiçi doktor randevu sistemi
+    </p>
+
+    @if (!string.IsNullOrEmpty(kullanici))
+    {
+        <!-- Kullanıcı giriş yapmışsa Randevu sayfasına yönlendir -->
+        <a asp-controller="Home" asp-action="RandevuAl" class="btn btn-primary btn-lg mt-4 px-4">
+            Hemen Randevu Al
+        </a>
+
+
+    }
+    else
+    {
+        <!-- Giriş yapılmadıysa önce giriş sayfasına yönlendir -->
+        <a asp-controller="Account" asp-action="Login"
+           class="btn btn-primary btn-lg mt-4 px-4">
+            Hemen Randevu Al
+        </a>
+    }
+</div>

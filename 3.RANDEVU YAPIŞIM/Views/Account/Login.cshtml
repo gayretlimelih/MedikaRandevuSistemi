@@ -1,0 +1,32 @@
+﻿@{
+    ViewData["Title"] = "Giriş Yap";
+}
+
+<div class="hero-box">
+    <h3 class="text-primary fw-bold mb-4 text-center">Giriş Yap</h3>
+
+    @if (ViewBag.Hata != null)
+    {
+        <div class="alert alert-danger text-center">@ViewBag.Hata</div>
+    }
+
+    <form asp-action="Login" method="post">
+        <div class="mb-3">
+            <label class="form-label">E-Posta</label>
+            <input type="email" name="Email" class="form-control" placeholder="ornek@medika.com" required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Şifre</label>
+            <input type="password" name="Sifre" class="form-control" placeholder="Şifrenizi giriniz" required />
+        </div>
+
+        <div class="d-grid">
+            <button type="submit" class="btn btn-primary">Giriş Yap</button>
+        </div>
+
+        <div class="text-center mt-3">
+            <a href="/Account/Register" class="text-decoration-none">Hesabınız yok mu? Kayıt olun</a>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,101 @@
+﻿@model List<_3.RANDEVU_YAPISIM.Models.Doktor>
+
+@{
+    ViewData["Title"] = "Doktor Yönetimi";
+}
+
+<div class="container mt-4">
+
+    <!-- 🔹 Yeni Doktor Ekle -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Yeni Doktor Ekle</h5>
+
+            <div class="row g-2">
+                <div class="col-md-5">
+                    <input type="text" id="adSoyad" class="form-control" placeholder="Ad Soyad" />
+                </div>
+                <div class="col-md-5">
+                    <input type="text" id="brans" class="form-control" placeholder="Branş" />
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button class="btn btn-success" onclick="doktorEkle()">Ekle</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔹 Doktor Listesi -->
+    <h2 class="fw-bold text-primary">Doktor Yönetimi</h2>
+    <hr />
+
+    <table class="table table-bordered table-striped">
+        <thead class="table-light">
+            <tr>
+                <th>Ad Soyad</th>
+                <th>Branş</th>
+                <th style="width:120px;">İşlem</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var doktor in Model)
+            {
+                <tr id="row-@doktor.Id">
+                    <td>@doktor.AdSoyad</td>
+                    <td>@doktor.Brans</td>
+                    <td>
+                        <button class="btn btn-sm btn-danger"
+                                onclick="doktorSil(@doktor.Id)">
+                            Sil
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- 🔹 API ile konuşan JS -->
+<script>
+    function doktorEkle() {
+        const adSoyad = document.getElementById("adSoyad").value.trim();
+        const brans = document.getElementById("brans").value.trim();
+
+        if (!adSoyad || !brans) {
+            alert("Ad Soyad ve Branş boş olamaz.");
+            return;
+        }
+
+        fetch("/api/admin/doktorlar", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                adSoyad: adSoyad,
+                brans: brans
+            })
+        })
+        .then(res => {
+            if (!res.ok) throw new Error("Doktor eklenemedi.");
+            return res.json();
+        })
+        .then(() => {
+            location.reload(); // listeyi güncelle
+        })
+        .catch(err => alert(err.message));
+    }
+
+    function doktorSil(id) {
+        if (!confirm("Bu doktor silinsin mi?")) return;
+
+        fetch(`/api/admin/doktorlar/${id}`, {
+            method: "DELETE"
+        })
+        .then(res => {
+            if (!res.ok) throw new Error("Doktor silinemedi.");
+            document.getElementById(`row-${id}`).remove();
+        })
+        .catch(err => alert(err.message));
+    }
+</script>

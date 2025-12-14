@@ -1,0 +1,59 @@
+﻿@{
+    ViewData["Title"] = "Admin Paneli";
+}
+
+<div class="container mt-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold text-primary">Admin Paneli</h2>
+        <p class="text-muted">Sistem yönetim işlemlerini buradan gerçekleştirebilirsiniz.</p>
+    </div>
+
+    <div class="row justify-content-center g-4">
+
+        <!-- Doktor Yönetimi -->
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100 text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">👨‍⚕️ Doktor Yönetimi</h5>
+                    <p class="card-text">
+                        Doktor ekleme, güncelleme ve silme işlemleri.
+                    </p>
+                    <a href="/Admin/Doktorlar" class="btn btn-outline-primary w-100">
+                        Doktorları Yönet
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Randevu Yönetimi -->
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100 text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-success">📅 Randevu Yönetimi</h5>
+                    <p class="card-text">
+                        Tüm randevuları görüntüle, iptal et veya düzenle.
+                    </p>
+                    <a href="/Admin/Randevular" class="btn btn-outline-success w-100">
+                        Randevuları Yönet
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hasta Yönetimi -->
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100 text-center">
+                <div class="card-body">
+                    <h5 class="card-title text-danger">🧑‍🦱 Hasta Yönetimi</h5>
+                    <p class="card-text">
+                        Hasta kayıtlarını görüntüle ve yönet.
+                    </p>
+                    <a href="/Admin/Hastalar" class="btn btn-outline-danger w-100">
+                        Hastaları Yönet
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

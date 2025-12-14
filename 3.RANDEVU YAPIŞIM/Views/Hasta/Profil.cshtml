@@ -1,0 +1,53 @@
+﻿@model _3.RANDEVU_YAPISIM.Models.Hasta
+@{
+    ViewData["Title"] = "Profilim";
+}
+
+<div class="container mt-4">
+    <h2 class="fw-bold">Profilim</h2>
+    <p class="text-muted">TC, adres ve doğum tarihi bilgilerini buradan ekleyebilirsin.</p>
+    <hr />
+
+    @if (TempData["ProfilMesaji"] != null)
+    {
+        <div class="alert alert-success">@TempData["ProfilMesaji"]</div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form asp-controller="Hasta" asp-action="Profil" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+                    <label class="form-label">Ad Soyad</label>
+                    <input class="form-control" value="@Model.AdSoyad" disabled />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">E-Posta</label>
+                    <input class="form-control" value="@Model.Email" disabled />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">TC Kimlik No</label>
+                    <input name="TcKimlik" class="form-control" maxlength="11"
+                           value="@Model.TcKimlik" placeholder="11 haneli" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Adres</label>
+                    <textarea name="Adres" class="form-control" rows="3"
+                              placeholder="Adres">@Model.Adres</textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Doğum Tarihi</label>
+                    <input name="DogumTarihi" type="date" class="form-control"
+                           value="@(Model.DogumTarihi.HasValue? Model.DogumTarihi.Value.ToString("yyyy-MM-dd") : "")" />
+                </div>
+
+                <button type="submit" class="btn btn-primary">Kaydet</button>
+            </form>
+        </div>
+    </div>
+</div>

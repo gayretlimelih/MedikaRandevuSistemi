@@ -16,9 +16,14 @@ namespace _3.RANDEVU_YAPISIM.Models
         [Required]
         public string Sifre { get; set; } = string.Empty;
 
-        // Veritabanında dursun ama kayıt formunda görünmesin
         public string? TcKimlik { get; set; }
         public string? Adres { get; set; }
         public DateTime? DogumTarihi { get; set; }
+
+        // Rol: Admin / Hasta
+        public string Role { get; set; } = "Hasta";
+
+        // Aktif - Pasif (Soft Delete)
+        public bool Aktif { get; set; } = true;
     }
 }

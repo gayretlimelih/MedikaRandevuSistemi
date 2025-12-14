@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using _3.RANDEVU_YAPISIM.Data;
 
@@ -11,9 +12,11 @@ using _3.RANDEVU_YAPISIM.Data;
 namespace _3.RANDEVU_YAPIŞIM.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251214115743_AddRandevuDurum")]
+    partial class AddRandevuDurum
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -255,9 +258,6 @@ namespace _3.RANDEVU_YAPIŞIM.Migrations
 
                     b.Property<string>("Adres")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("Aktif")
-                        .HasColumnType("bit");
 
                     b.Property<DateTime?>("DogumTarihi")
                         .HasColumnType("datetime2");

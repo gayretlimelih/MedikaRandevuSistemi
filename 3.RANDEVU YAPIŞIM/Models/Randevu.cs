@@ -24,5 +24,7 @@ namespace _3.RANDEVU_YAPISIM.Models
         // Navigation özellikleri
         public Hasta? Hasta { get; set; }
         public Doktor? Doktor { get; set; }
+        public string Durum { get; set; } = "Aktif"; // Aktif / İptal
+
     }
 }

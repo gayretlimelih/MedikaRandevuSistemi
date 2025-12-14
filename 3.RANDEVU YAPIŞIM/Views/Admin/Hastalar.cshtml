@@ -1,0 +1,74 @@
+﻿@model List<_3.RANDEVU_YAPISIM.Models.Hasta>
+
+@{
+    ViewData["Title"] = "Hasta Yönetimi";
+}
+
+<div class="container mt-4">
+    <h2 class="fw-bold text-danger">Hasta Yönetimi</h2>
+    <hr />
+
+    <div class="alert alert-light border d-flex justify-content-between align-items-center">
+        <span><strong>Toplam Hasta:</strong> @Model.Count</span>
+        <span class="text-muted">Yönetim ekranı (listeleme)</span>
+    </div>
+
+    <table class="table table-bordered table-striped align-middle">
+        <thead class="table-light">
+            <tr>
+                <th style="width:80px;">Id</th>
+                <th>Ad Soyad</th>
+                <th>E-Posta</th>
+                <th style="width:140px;">Rol</th>
+                <th style="width:110px;">Durum</th>
+                <th style="width:170px;">İşlem</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var h in Model)
+            {
+                var rolText = string.IsNullOrWhiteSpace(h.Role) ? "Hasta" : h.Role;
+                <tr>
+                    <td>@h.Id</td>
+                    <td>@h.AdSoyad</td>
+                    <td>@h.Email</td>
+                    <td>@rolText</td>
+
+                    <td>
+                        @if (h.Aktif)
+                        {
+                            <span class="badge bg-success">Aktif</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Pasif</span>
+                        }
+                    </td>
+
+                    <td>
+                        <form asp-controller="Admin" asp-action="HastaDurumDegistir" method="post"
+                              onsubmit="return confirm('Durumu değiştirmek istiyor musun?');"
+                              class="d-inline">
+                            <input type="hidden" name="id" value="@h.Id" />
+                            <input type="hidden" name="aktifMi" value="@(h.Aktif ? "false" : "true")" />
+
+                            @if (h.Aktif)
+                            {
+                                <button type="submit" class="btn btn-warning btn-sm">
+                                    Pasife Al
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    Aktif Et
+                                </button>
+                            }
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

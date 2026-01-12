@@ -29,6 +29,8 @@
             @foreach (var h in Model)
             {
                 var rolText = string.IsNullOrWhiteSpace(h.Role) ? "Hasta" : h.Role;
+                bool aktifMi = h.Aktif;
+
                 <tr>
                     <td>@h.Id</td>
                     <td>@h.AdSoyad</td>
@@ -36,7 +38,7 @@
                     <td>@rolText</td>
 
                     <td>
-                        @if (h.Aktif)
+                        @if (aktifMi)
                         {
                             <span class="badge bg-success">Aktif</span>
                         }
@@ -47,28 +49,72 @@
                     </td>
 
                     <td>
-                        <form asp-controller="Admin" asp-action="HastaDurumDegistir" method="post"
-                              onsubmit="return confirm('Durumu değiştirmek istiyor musun?');"
-                              class="d-inline">
-                            <input type="hidden" name="id" value="@h.Id" />
-                            <input type="hidden" name="aktifMi" value="@(h.Aktif ? "false" : "true")" />
-
-                            @if (h.Aktif)
-                            {
-                                <button type="submit" class="btn btn-warning btn-sm">
-                                    Pasife Al
-                                </button>
-                            }
-                            else
-                            {
-                                <button type="submit" class="btn btn-success btn-sm">
-                                    Aktif Et
-                                </button>
-                            }
-                        </form>
+                        @if (aktifMi)
+                        {
+                            <button class="btn btn-warning btn-sm js-pasif"
+                                    data-id="@h.Id">
+                                Pasife Al
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-success btn-sm js-aktif"
+                                    data-id="@h.Id">
+                                Aktif Et
+                            </button>
+                        }
                     </td>
                 </tr>
             }
         </tbody>
     </table>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("click", async (e) => {
+
+            // PASİF YAP
+            const pasifBtn = e.target.closest(".js-pasif");
+            if (pasifBtn) {
+                const id = pasifBtn.dataset.id;
+
+                if (!confirm("Hastayı pasif yapmak istiyor musunuz?"))
+                    return;
+
+                const res = await fetch(`/api/admin/hastalar/${id}/pasif`, {
+                    method: "POST",
+                    credentials: "same-origin"
+                });
+
+                if (!res.ok) {
+                    alert("Pasif yapılamadı");
+                    return;
+                }
+
+                location.reload();
+            }
+
+            // AKTİF YAP
+            const aktifBtn = e.target.closest(".js-aktif");
+            if (aktifBtn) {
+                const id = aktifBtn.dataset.id;
+
+                if (!confirm("Hastayı tekrar aktif yapmak istiyor musunuz?"))
+                    return;
+
+                const res = await fetch(`/api/admin/hastalar/${id}/aktif`, {
+                    method: "POST",
+                    credentials: "same-origin"
+                });
+
+                if (!res.ok) {
+                    alert("Aktif yapılamadı");
+                    return;
+                }
+
+                location.reload();
+            }
+        });
+    </script>
+}

@@ -5,12 +5,15 @@
 }
 
 <div class="container mt-5">
-    <h2 class="text-success fw-bold mb-3">Randevu Yönetimi</h2>
+    <h2 class="text-success fw-bold mb-2">Randevu Yönetimi</h2>
     <p class="text-muted">Tüm randevular sistem üzerinden listelenir.</p>
 
     <div class="card shadow-sm">
         <div class="card-body">
-            <p><strong>Toplam Randevu:</strong> @Model.Count</p>
+
+            <p>
+                <strong>Toplam Randevu:</strong> @Model.Count
+            </p>
 
             <table class="table table-bordered table-striped align-middle">
                 <thead class="table-light">
@@ -26,9 +29,12 @@
                         <th>İşlem</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     @foreach (var r in Model)
                     {
+                        bool iptalMi = r.Durum == "İptal";
+
                         <tr>
                             <td>@r.Id</td>
                             <td>@r.DoktorAdSoyad</td>
@@ -37,8 +43,9 @@
                             <td>@r.HastaEmail</td>
                             <td>@r.Tarih.ToString("dd.MM.yyyy")</td>
                             <td>@r.Saat</td>
+
                             <td>
-                                @if (r.Durum == "İptal")
+                                @if (iptalMi)
                                 {
                                     <span class="badge bg-danger">İptal</span>
                                 }
@@ -47,27 +54,82 @@
                                     <span class="badge bg-success">Aktif</span>
                                 }
                             </td>
+
                             <td>
-                                @if (r.Durum != "İptal")
+                                @if (!iptalMi)
                                 {
-                                    <form asp-action="RandevuIptal" method="post" class="d-inline">
-                                        <input type="hidden" name="id" value="@r.Id" />
-                                        <button type="submit"
-                                                class="btn btn-sm btn-danger"
-                                                onclick="return confirm('Bu randevuyu iptal etmek istiyor musunuz?');">
-                                            İptal Et
-                                        </button>
-                                    </form>
+                                    <button class="btn btn-sm btn-danger js-iptal"
+                                            data-id="@r.Id">
+                                        İptal Et
+                                    </button>
                                 }
                                 else
                                 {
-                                    <span class="text-muted">—</span>
+                                    <button class="btn btn-sm btn-success js-aktif"
+                                            data-id="@r.Id">
+                                        İptali Geri Al
+                                    </button>
                                 }
                             </td>
                         </tr>
                     }
                 </tbody>
             </table>
+
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("click", async (e) => {
+
+            /* =========================
+               RANDEVU İPTAL
+               ========================= */
+            const iptalBtn = e.target.closest(".js-iptal");
+            if (iptalBtn) {
+                const id = iptalBtn.dataset.id;
+
+                if (!confirm("Bu randevuyu iptal etmek istiyor musunuz?"))
+                    return;
+
+                const res = await fetch(`/api/admin/randevular/${id}/iptal`, {
+                    method: "POST",
+                    credentials: "same-origin"
+                });
+
+                if (!res.ok) {
+                    alert(await res.text());
+                    return;
+                }
+
+                location.reload();
+                return;
+            }
+
+            /* =========================
+               İPTALİ GERİ AL
+               ========================= */
+            const aktifBtn = e.target.closest(".js-aktif");
+            if (aktifBtn) {
+                const id = aktifBtn.dataset.id;
+
+                if (!confirm("Bu randevuyu tekrar aktif yapmak istiyor musunuz?"))
+                    return;
+
+                const res = await fetch(`/api/admin/randevular/${id}/aktif`, {
+                    method: "POST",
+                    credentials: "same-origin"
+                });
+
+                if (!res.ok) {
+                    alert(await res.text());
+                    return;
+                }
+
+                location.reload();
+            }
+        });
+    </script>
+}

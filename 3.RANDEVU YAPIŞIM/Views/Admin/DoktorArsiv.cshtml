@@ -1,0 +1,47 @@
+﻿@model List<_3.RANDEVU_YAPISIM.Models.Doktor>
+
+@{
+    ViewData["Title"] = "Doktor Arşivi";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h2 class="fw-bold text-warning m-0">Doktor Arşivi</h2>
+
+        <a class="btn btn-secondary" href="/Admin/Doktorlar">← Doktor Yönetimi</a>
+    </div>
+
+    <p class="text-muted">
+        Arşivlenen doktorlar burada listelenir. İstersen geri aktif edebilirsin.
+    </p>
+    <hr />
+
+    <table class="table table-bordered table-striped align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>Ad Soyad</th>
+                <th>Branş</th>
+                <th style="width:160px;">İşlem</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var doktor in Model)
+            {
+                <tr>
+                    <td>@doktor.AdSoyad</td>
+                    <td>@doktor.Brans</td>
+                    <td>
+                        <form asp-action="DoktorGeriAl" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@doktor.Id" />
+                            <button type="submit" class="btn btn-sm btn-success"
+                                    onclick="return confirm('Bu doktoru tekrar aktif etmek istiyor musunuz?');">
+                                Geri Al
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

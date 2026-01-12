@@ -1,11 +1,10 @@
 ﻿{
-  "$schema": "https://json.schemastore.org/launchsettings.json",
   "profiles": {
-    "3.RANDEVU_YAPISIM": {
+    "3.RANDEVU_YAPIŞIM": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
-      "applicationUrl": "https://localhost:7123",
+      "applicationUrl": "https://localhost:7123;http://localhost:7124",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

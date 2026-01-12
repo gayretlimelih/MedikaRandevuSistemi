@@ -6,8 +6,22 @@
 
 <div class="container mt-4">
 
-    <!-- 🔹 Yeni Doktor Ekle -->
-    <div class="card mb-4">
+    <!-- Arşive Git -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold text-primary m-0">Doktor Yönetimi</h2>
+
+        <a class="btn btn-warning" href="/Admin/DoktorArsiv">
+            Arşive Git
+        </a>
+    </div>
+
+    <!-- ✅ Anti-forgery token üret (JS fetch için) -->
+    <form id="__af" method="post" class="d-none">
+        @Html.AntiForgeryToken()
+    </form>
+
+    <!-- Yeni Doktor Ekle -->
+    <div class="card mb-4 shadow-sm">
         <div class="card-body">
             <h5 class="card-title">Yeni Doktor Ekle</h5>
 
@@ -19,17 +33,18 @@
                     <input type="text" id="brans" class="form-control" placeholder="Branş" />
                 </div>
                 <div class="col-md-2 d-grid">
-                    <button class="btn btn-success" onclick="doktorEkle()">Ekle</button>
+                    <button type="button" class="btn btn-success" onclick="doktorEkle()">Ekle</button>
                 </div>
             </div>
+
+            <small class="text-muted d-block mt-2">
+                Aynı Ad Soyad + aynı Branş eklenirse hata verir.
+            </small>
         </div>
     </div>
 
-    <!-- 🔹 Doktor Listesi -->
-    <h2 class="fw-bold text-primary">Doktor Yönetimi</h2>
-    <hr />
-
-    <table class="table table-bordered table-striped">
+    <!-- Aktif Doktor Listesi -->
+    <table class="table table-bordered table-striped align-middle">
         <thead class="table-light">
             <tr>
                 <th>Ad Soyad</th>
@@ -37,15 +52,17 @@
                 <th style="width:120px;">İşlem</th>
             </tr>
         </thead>
+
         <tbody>
+            //burda Model olarak alıyor.
+            //Tablo kısmında foreach (var doktor in Model) ile her doktor için bir satır oluşturuluyor.
             @foreach (var doktor in Model)
             {
                 <tr id="row-@doktor.Id">
                     <td>@doktor.AdSoyad</td>
                     <td>@doktor.Brans</td>
                     <td>
-                        <button class="btn btn-sm btn-danger"
-                                onclick="doktorSil(@doktor.Id)">
+                        <button type="button" class="btn btn-sm btn-danger" onclick="doktorSil(@doktor.Id)">
                             Sil
                         </button>
                     </td>
@@ -55,47 +72,66 @@
     </table>
 </div>
 
-<!-- 🔹 API ile konuşan JS -->
-<script>
-    function doktorEkle() {
-        const adSoyad = document.getElementById("adSoyad").value.trim();
-        const brans = document.getElementById("brans").value.trim();
-
-        if (!adSoyad || !brans) {
-            alert("Ad Soyad ve Branş boş olamaz.");
-            return;
+@section Scripts {
+    <script>
+        function getAntiForgeryToken() {
+            const el = document.querySelector('#__af input[name="__RequestVerificationToken"]');
+            return el ? el.value : "";
         }
 
-        fetch("/api/admin/doktorlar", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                adSoyad: adSoyad,
-                brans: brans
+        function doktorEkle() {
+            const adSoyad = document.getElementById("adSoyad").value.trim();
+            const brans = document.getElementById("brans").value.trim();
+
+            if (!adSoyad || !brans) {
+                alert("Ad Soyad ve Branş boş olamaz.");
+                return;
+            }
+
+            const token = getAntiForgeryToken();
+
+            fetch("/api/admin/doktorlar", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "RequestVerificationToken": token
+                },
+                credentials: "same-origin",
+                body: JSON.stringify({ adSoyad, brans })
             })
-        })
-        .then(res => {
-            if (!res.ok) throw new Error("Doktor eklenemedi.");
-            return res.json();
-        })
-        .then(() => {
-            location.reload(); // listeyi güncelle
-        })
-        .catch(err => alert(err.message));
-    }
+            .then(async res => {
+                if (!res.ok) {
+                    const msg = await res.text();
+                    throw new Error(msg || "Doktor eklenemedi.");
+                }
+                return res.json();
+            })
+            .then(() => location.reload())
+            .catch(err => alert(err.message));
+        }
 
-    function doktorSil(id) {
-        if (!confirm("Bu doktor silinsin mi?")) return;
+        function doktorSil(id) {
+            if (!confirm("Bu doktor arşive alınsın mı?")) return;
 
-        fetch(`/api/admin/doktorlar/${id}`, {
-            method: "DELETE"
-        })
-        .then(res => {
-            if (!res.ok) throw new Error("Doktor silinemedi.");
-            document.getElementById(`row-${id}`).remove();
-        })
-        .catch(err => alert(err.message));
-    }
-</script>
+            const token = getAntiForgeryToken();
+
+            fetch(`/api/admin/doktorlar/${id}`, {
+                method: "DELETE",
+                headers: {
+                    "RequestVerificationToken": token
+                },
+                credentials: "same-origin"
+            })
+            .then(async res => {
+                if (!res.ok) {
+                    const msg = await res.text();
+                    throw new Error(msg || "Doktor silinemedi.");
+                }
+
+                const row = document.getElementById(`row-${id}`);
+                if (row) row.remove();
+            })
+            .catch(err => alert(err.message));
+        }
+    </script>
+}

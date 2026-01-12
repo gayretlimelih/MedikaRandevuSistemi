@@ -1,6 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using _3.RANDEVU_YAPISIM.Data;
+using _3.RANDEVU_YAPISIM.Models;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace _3.RANDEVU_YAPISIM.Controllers
 {
@@ -13,14 +17,16 @@ namespace _3.RANDEVU_YAPISIM.Controllers
             _context = context;
         }
 
-        // ✅ Admin kontrol helper
+        // ================= ADMIN KONTROL =================
         private bool IsAdmin()
         {
-            var role = (HttpContext.Session.GetString("Role") ?? "").Trim().ToLower();
+            var role = (HttpContext.Session.GetString("Role") ?? "")
+                .Trim()
+                .ToLower();
+
             return role == "admin";
         }
 
-        // ✅ Admin değilse Login’e at
         private IActionResult? AdminGirisYoksaAt()
         {
             if (!IsAdmin())
@@ -29,7 +35,7 @@ namespace _3.RANDEVU_YAPISIM.Controllers
             return null;
         }
 
-        // 🔹 Admin Ana Sayfa
+        // ================= ADMIN ANA SAYFA =================
         public IActionResult Index()
         {
             var guard = AdminGirisYoksaAt();
@@ -38,65 +44,104 @@ namespace _3.RANDEVU_YAPISIM.Controllers
             return View();
         }
 
-        // 🔹 Doktor Yönetimi
+        // ================= DOKTOR YÖNETİMİ =================
         public IActionResult Doktorlar()
         {
             var guard = AdminGirisYoksaAt();
             if (guard != null) return guard;
 
-            var doktorlar = _context.Doktorlar.OrderByDescending(d => d.Id).ToList();
+            var doktorlar = _context.Doktorlar
+                .Where(d => !d.Arsivli)
+                .OrderByDescending(d => d.Id)
+                .ToList();
+
             return View(doktorlar);
         }
 
-        // 🔹 Hasta Yönetimi (Aktif + Pasif hepsi)
+        public IActionResult DoktorArsiv()
+        {
+            var guard = AdminGirisYoksaAt();
+            if (guard != null) return guard;
+
+            var arsiv = _context.Doktorlar
+                .Where(d => d.Arsivli)
+                .OrderByDescending(d => d.Id)
+                .ToList();
+
+            return View(arsiv);
+        }
+
+        // ================= DOKTOR SİL (ARŞİVE AT) =================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DoktorSil(int id)
+        {
+            var guard = AdminGirisYoksaAt();
+            if (guard != null) return guard;
+
+            var doktor = _context.Doktorlar.FirstOrDefault(d => d.Id == id);
+            if (doktor == null) return NotFound();
+
+            doktor.Arsivli = true;
+            _context.SaveChanges();
+
+            return RedirectToAction("Doktorlar");
+        }
+
+        // ================= ARŞİVDEN GERİ AL =================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DoktorGeriAl(int id)
+        {
+            var guard = AdminGirisYoksaAt();
+            if (guard != null) return guard;
+
+            var doktor = _context.Doktorlar.FirstOrDefault(d => d.Id == id);
+            if (doktor == null) return NotFound();
+
+            doktor.Arsivli = false;
+            _context.SaveChanges();
+
+            return RedirectToAction("DoktorArsiv");
+        }
+
+        // ================= HASTA YÖNETİMİ =================
         public IActionResult Hastalar()
         {
             var guard = AdminGirisYoksaAt();
             if (guard != null) return guard;
 
-            var hastalar = _context.Hastalar.OrderByDescending(h => h.Id).ToList();
+            var hastalar = _context.Hastalar
+                .OrderByDescending(h => h.Id)
+                .ToList();
+
             return View(hastalar);
         }
 
-        // ✅ Hasta Durum Değiştir (Aktif/Pasif)
-        [HttpPost]
-        public IActionResult HastaDurumDegistir(int id, bool aktifMi)
+        // ================= RANDEVU YÖNETİMİ =================
+        public async Task<IActionResult> Randevular()
         {
             var guard = AdminGirisYoksaAt();
             if (guard != null) return guard;
 
-            var hasta = _context.Hastalar.FirstOrDefault(x => x.Id == id);
-            if (hasta == null) return NotFound();
+            var randevular = await _context.Randevular
+                .Include(r => r.Doktor)
+                .Include(r => r.Hasta)
+                .OrderByDescending(r => r.Id)
+                .Select(r => new AdminRandevuVM
+                {
+                    Id = r.Id,
+                    DoktorAdSoyad = r.Doktor.AdSoyad ?? "",
+                    Brans = r.Doktor.Brans ?? "",
+                    HastaAdSoyad = r.Hasta.AdSoyad ?? "",
+                    HastaEmail = r.Hasta.Email ?? "",
+                    Tarih = r.Tarih,
+                    Saat = r.Saat ?? "",
+                    Durum = r.Durum ?? "Aktif"
+                })
+                .ToListAsync();
 
-            hasta.Aktif = aktifMi;
-            _context.SaveChanges();
-
-            return RedirectToAction("Hastalar");
-        }
-
-        // 🔹 Randevu Yönetimi
-        public IActionResult Randevular()
-        {
-            var guard = AdminGirisYoksaAt();
-            if (guard != null) return guard;
-
-            var liste = (from r in _context.Randevular
-                         join d in _context.Doktorlar on r.DoktorId equals d.Id
-                         join h in _context.Hastalar on r.HastaId equals h.Id
-                         orderby r.Id descending
-                         select new _3.RANDEVU_YAPISIM.Models.AdminRandevuVM
-                         {
-                             Id = r.Id,
-                             DoktorAdSoyad = d.AdSoyad,
-                             Brans = d.Brans,
-                             HastaAdSoyad = h.AdSoyad,
-                             HastaEmail = h.Email,
-                             Tarih = r.Tarih,
-                             Saat = r.Saat,
-                             Durum = r.Durum
-                         }).ToList();
-
-            return View(liste);
+            return View(randevular);
         }
     }
 }
